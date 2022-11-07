@@ -1,14 +1,9 @@
 import React from "react";
-import Navbar from "./components/Navbar";
-import LoginPage from "./routes/Login/LoginPage";
+import { RouterProvider } from "react-router-dom";
+import { BrowseRouter } from "./routes";
 
 function App() {
-	return (
-		<div className="App">
-			{/*<LoginPage/>*/}
-			<Navbar />
-		</div>
-	);
+	return <RouterProvider router={BrowseRouter} />;
 }
 
 export default App;

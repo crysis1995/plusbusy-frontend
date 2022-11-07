@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Checkbox, Label, TextInput } from "flowbite-react";
-import {TextInputColors} from "flowbite-react/lib/esm/components/FormControls/TextInput";
+import { TextInput } from "../../common/Form/TextInput";
+import { Label } from "../../common/Form/Label";
+import { Checkbox } from "../../common/Form/Checkbox";
 
 type TextsEnum =
 	| "LoginForm.Email"
@@ -15,26 +16,31 @@ const Texts: { [key in TextsEnum]: string } = {
 	"LoginForm.LoginButton": "Zaloguj",
 };
 
-export default function () {
+export default function LoginForm() {
 	return (
 		<form className="flex flex-col gap-4">
 			<div>
-				<div className="mb-2 block">
-					<Label htmlFor="email1" value={Texts["LoginForm.Email"]} />
+				<div className="mb-2">
+					<Label>Email</Label>
 				</div>
-				<TextInput  id="email1" type="email" placeholder="" required={true} />
+				<TextInput type={"email"} />
 			</div>
 			<div>
-				<div className="mb-2 block">
-					<Label htmlFor="password1" value={Texts["LoginForm.Password"]} />
+				<div className="mb-2">
+					<Label>Hasło</Label>
 				</div>
-				<TextInput id="password1" type="password" required={true} />
+				<TextInput type={"password"} />
 			</div>
 			<div className="flex items-center gap-2">
-				<Checkbox id="remember" />
-				<Label htmlFor="remember">{Texts["LoginForm.RememberMe"]}</Label>
+				<Checkbox id={"remember"} />
+				<Label htmlFor={"remember"}>{Texts["LoginForm.RememberMe"]}</Label>
 			</div>
-			<Button type="submit">{Texts["LoginForm.LoginButton"]}</Button>
+			<button
+				type="submit"
+				className="bg-blue-700 rounded-lg text-white py-2.5 font-medium px-4 w-full text-sm hover:bg-blue-800"
+			>
+				{Texts["LoginForm.LoginButton"]}
+			</button>
 		</form>
 	);
 }
