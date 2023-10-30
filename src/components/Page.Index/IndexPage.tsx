@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "../../common/Navbar";
-import { Outlet } from "react-router-dom";
+import {Outlet, useLocation} from "react-router-dom";
 
 const IndexPage = () => {
 	return (
@@ -10,7 +10,7 @@ const IndexPage = () => {
 				<div className={"flex flex-row items-center"}>
 					<div className=" mr-5">
 						<Navbar.Menu>
-							<Navbar.MenuLink path={"/jobs"}>Zlecenia</Navbar.MenuLink>
+							{/*<Navbar.MenuLink path={"/jobs"}>Zlecenia</Navbar.MenuLink>*/}
 							<Navbar.MenuLink path={"/courses"}>Kursy</Navbar.MenuLink>
 							<Navbar.MenuLink path={"/vehicles"}>Pojazdy</Navbar.MenuLink>
 							<Navbar.MenuLink path={"/drivers"}>Kierowcy</Navbar.MenuLink>
@@ -22,8 +22,7 @@ const IndexPage = () => {
 				</div>
 			</Navbar.Navbar>
 			<div className={"w-full h-full flex flex-col"}>
-				{/*<div className={"bg-green-800 p-3"}>breadcromp</div>*/}
-				<div className={"w-full h-full bg-pink-500 p-3"}>
+				<div className={"w-full h-full p-3"}>
 					<Outlet />
 				</div>
 			</div>

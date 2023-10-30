@@ -74,22 +74,16 @@ export interface FullRequestParams extends Omit<RequestInit, "body"> {
 	cancelToken?: CancelToken;
 }
 
-export type RequestParams = Omit<
-	FullRequestParams,
-	"body" | "method" | "query" | "path"
->;
+export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">;
 
 export interface ApiConfig<SecurityDataType = unknown> {
 	baseUrl?: string;
 	baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
-	securityWorker?: (
-		securityData: SecurityDataType | null
-	) => Promise<RequestParams | void> | RequestParams | void;
+	securityWorker?: (securityData: SecurityDataType | null) => Promise<RequestParams | void> | RequestParams | void;
 	customFetch?: typeof fetch;
 }
 
-export interface HttpResponse<D extends unknown, E extends unknown = unknown>
-	extends Response {
+export interface HttpResponse<D extends unknown, E extends unknown = unknown> extends Response {
 	data: D;
 	error: E;
 }
@@ -107,8 +101,7 @@ export class HttpClient<SecurityDataType = unknown> {
 	private securityData: SecurityDataType | null = null;
 	private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
 	private abortControllers = new Map<CancelToken, AbortController>();
-	private customFetch = (...fetchParams: Parameters<typeof fetch>) =>
-		fetch(...fetchParams);
+	private customFetch = (...fetchParams: Parameters<typeof fetch>) => fetch(...fetchParams);
 
 	private baseApiParams: RequestParams = {
 		credentials: "same-origin",
@@ -127,9 +120,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 	protected encodeQueryParam(key: string, value: any) {
 		const encodedKey = encodeURIComponent(key);
-		return `${encodedKey}=${encodeURIComponent(
-			typeof value === "number" ? value : `${value}`
-		)}`;
+		return `${encodedKey}=${encodeURIComponent(typeof value === "number" ? value : `${value}`)}`;
 	}
 
 	protected addQueryParam(query: QueryParamsType, key: string) {
@@ -143,14 +134,10 @@ export class HttpClient<SecurityDataType = unknown> {
 
 	protected toQueryString(rawQuery?: QueryParamsType): string {
 		const query = rawQuery || {};
-		const keys = Object.keys(query).filter(
-			(key) => "undefined" !== typeof query[key]
-		);
+		const keys = Object.keys(query).filter((key) => "undefined" !== typeof query[key]);
 		return keys
 			.map((key) =>
-				Array.isArray(query[key])
-					? this.addArrayQueryParam(query, key)
-					: this.addQueryParam(query, key)
+				Array.isArray(query[key]) ? this.addArrayQueryParam(query, key) : this.addQueryParam(query, key)
 			)
 			.join("&");
 	}
@@ -162,9 +149,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 	private contentFormatters: Record<ContentType, (input: any) => any> = {
 		[ContentType.Json]: (input: any) =>
-			input !== null && (typeof input === "object" || typeof input === "string")
-				? JSON.stringify(input)
-				: input,
+			input !== null && (typeof input === "object" || typeof input === "string") ? JSON.stringify(input) : input,
 		[ContentType.FormData]: (input: any) =>
 			Object.keys(input || {}).reduce((formData, key) => {
 				const property = input[key];
@@ -181,10 +166,7 @@ export class HttpClient<SecurityDataType = unknown> {
 		[ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
 	};
 
-	protected mergeRequestParams(
-		params1: RequestParams,
-		params2?: RequestParams
-	): RequestParams {
+	protected mergeRequestParams(params1: RequestParams, params2?: RequestParams): RequestParams {
 		return {
 			...this.baseApiParams,
 			...params1,
@@ -197,9 +179,7 @@ export class HttpClient<SecurityDataType = unknown> {
 		};
 	}
 
-	protected createAbortSignal = (
-		cancelToken: CancelToken
-	): AbortSignal | undefined => {
+	protected createAbortSignal = (cancelToken: CancelToken): AbortSignal | undefined => {
 		if (this.abortControllers.has(cancelToken)) {
 			const abortController = this.abortControllers.get(cancelToken);
 			if (abortController) {
@@ -243,27 +223,15 @@ export class HttpClient<SecurityDataType = unknown> {
 		const payloadFormatter = this.contentFormatters[type || ContentType.Json];
 		const responseFormat = format || requestParams.format;
 
-		return this.customFetch(
-			`${baseUrl || this.baseUrl || ""}${path}${
-				queryString ? `?${queryString}` : ""
-			}`,
-			{
-				...requestParams,
-				headers: {
-					...(requestParams.headers || {}),
-					...(type && type !== ContentType.FormData
-						? { "Content-Type": type }
-						: {}),
-				},
-				signal: cancelToken
-					? this.createAbortSignal(cancelToken)
-					: requestParams.signal,
-				body:
-					typeof body === "undefined" || body === null
-						? null
-						: payloadFormatter(body),
-			}
-		).then(async (response) => {
+		return this.customFetch(`${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`, {
+			...requestParams,
+			headers: {
+				...(requestParams.headers || {}),
+				...(type && type !== ContentType.FormData ? { "Content-Type": type } : {}),
+			},
+			signal: cancelToken ? this.createAbortSignal(cancelToken) : requestParams.signal,
+			body: typeof body === "undefined" || body === null ? null : payloadFormatter(body),
+		}).then(async (response) => {
 			const r = response as HttpResponse<T, E>;
 			r.data = null as unknown as T;
 			r.error = null as unknown as E;
@@ -301,9 +269,7 @@ export class HttpClient<SecurityDataType = unknown> {
  *
  * The API of bus transport management app.
  */
-export class Api<
-	SecurityDataType extends unknown
-> extends HttpClient<SecurityDataType> {
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
 	api = {
 		/**
 		 * No description
@@ -355,10 +321,7 @@ export class Api<
 		 * @name AuthControllerPasswordReset
 		 * @request POST:/api/auth/password-reset
 		 */
-		authControllerPasswordReset: (
-			data: BasicUserDto,
-			params: RequestParams = {}
-		) =>
+		authControllerPasswordReset: (data: BasicUserDto, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/auth/password-reset`,
 				method: "POST",
@@ -402,10 +365,7 @@ export class Api<
 		 * @name CompanyControllerCreateCompany
 		 * @request POST:/api/company
 		 */
-		companyControllerCreateCompany: (
-			data: CreateCompanyDto,
-			params: RequestParams = {}
-		) =>
+		companyControllerCreateCompany: (data: CreateCompanyDto, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/company`,
 				method: "POST",
@@ -435,11 +395,7 @@ export class Api<
 		 * @name CompanyControllerUpdateCompany
 		 * @request PUT:/api/company/{id}
 		 */
-		companyControllerUpdateCompany: (
-			id: string,
-			data: UpdateCompanyDto,
-			params: RequestParams = {}
-		) =>
+		companyControllerUpdateCompany: (id: string, data: UpdateCompanyDto, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/company/${id}`,
 				method: "PUT",
@@ -484,10 +440,7 @@ export class Api<
 		 * @name DriverControllerCreateDriver
 		 * @request POST:/api/driver
 		 */
-		driverControllerCreateDriver: (
-			data: CreateDriverDto,
-			params: RequestParams = {}
-		) =>
+		driverControllerCreateDriver: (data: CreateDriverDto, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/driver`,
 				method: "POST",
@@ -517,11 +470,7 @@ export class Api<
 		 * @name DriverControllerUpdateDriver
 		 * @request PUT:/api/driver/{id}
 		 */
-		driverControllerUpdateDriver: (
-			id: number,
-			data: UpdateDriverDto,
-			params: RequestParams = {}
-		) =>
+		driverControllerUpdateDriver: (id: number, data: UpdateDriverDto, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/driver/${id}`,
 				method: "PUT",
@@ -676,10 +625,7 @@ export class Api<
 		 * @name VehicleMileageControllerGetNewest
 		 * @request GET:/api/vehicle-mileage/newest/{vehicleId}
 		 */
-		vehicleMileageControllerGetNewest: (
-			vehicleId: number,
-			params: RequestParams = {}
-		) =>
+		vehicleMileageControllerGetNewest: (vehicleId: number, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/vehicle-mileage/newest/${vehicleId}`,
 				method: "GET",
@@ -693,10 +639,7 @@ export class Api<
 		 * @name VehicleMileageControllerGetAllByVehicle
 		 * @request GET:/api/vehicle-mileage/byVehicle/{vehicleId}
 		 */
-		vehicleMileageControllerGetAllByVehicle: (
-			vehicleId: number,
-			params: RequestParams = {}
-		) =>
+		vehicleMileageControllerGetAllByVehicle: (vehicleId: number, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/vehicle-mileage/byVehicle/${vehicleId}`,
 				method: "GET",
@@ -748,10 +691,7 @@ export class Api<
 		 * @name VehicleMileageControllerSetMileage
 		 * @request POST:/api/vehicle-mileage
 		 */
-		vehicleMileageControllerSetMileage: (
-			data: CreateVehicleMileageDto,
-			params: RequestParams = {}
-		) =>
+		vehicleMileageControllerSetMileage: (data: CreateVehicleMileageDto, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/vehicle-mileage`,
 				method: "POST",
@@ -795,10 +735,7 @@ export class Api<
 		 * @name VehicleControllerCreate
 		 * @request POST:/api/vehicle
 		 */
-		vehicleControllerCreate: (
-			data: CreateVehicleDto,
-			params: RequestParams = {}
-		) =>
+		vehicleControllerCreate: (data: CreateVehicleDto, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/vehicle`,
 				method: "POST",
@@ -828,11 +765,7 @@ export class Api<
 		 * @name VehicleControllerUpdateVehicle
 		 * @request PUT:/api/vehicle/{id}
 		 */
-		vehicleControllerUpdateVehicle: (
-			id: number,
-			data: UpdateVehicleDto,
-			params: RequestParams = {}
-		) =>
+		vehicleControllerUpdateVehicle: (id: number, data: UpdateVehicleDto, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/vehicle/${id}`,
 				method: "PUT",
@@ -909,10 +842,7 @@ export class Api<
 		 * @name VehiclePeriodicInspectionControllerGetByVehicle
 		 * @request GET:/api/vehicle-periodic-inspection/byVehicle/{vehicleId}
 		 */
-		vehiclePeriodicInspectionControllerGetByVehicle: (
-			vehicleId: number,
-			params: RequestParams = {}
-		) =>
+		vehiclePeriodicInspectionControllerGetByVehicle: (vehicleId: number, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/vehicle-periodic-inspection/byVehicle/${vehicleId}`,
 				method: "GET",
@@ -1007,11 +937,7 @@ export class Api<
 		 * @name DriverPreferredVehiclesControllerGetPreferredData
 		 * @request GET:/api/driver-preferred-vehicles/all/{byType}/{id}
 		 */
-		driverPreferredVehiclesControllerGetPreferredData: (
-			byType: string,
-			id: number,
-			params: RequestParams = {}
-		) =>
+		driverPreferredVehiclesControllerGetPreferredData: (byType: string, id: number, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/driver-preferred-vehicles/all/${byType}/${id}`,
 				method: "GET",
@@ -1025,11 +951,7 @@ export class Api<
 		 * @name DriverPreferredVehiclesControllerGetById
 		 * @request GET:/api/driver-preferred-vehicles/{driverId}/{vehicleId}
 		 */
-		driverPreferredVehiclesControllerGetById: (
-			driverId: number,
-			vehicleId: number,
-			params: RequestParams = {}
-		) =>
+		driverPreferredVehiclesControllerGetById: (driverId: number, vehicleId: number, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/driver-preferred-vehicles/${driverId}/${vehicleId}`,
 				method: "GET",
@@ -1064,11 +986,7 @@ export class Api<
 		 * @name DriverPreferredVehiclesControllerDelete
 		 * @request DELETE:/api/driver-preferred-vehicles/{driverId}/{vehicleId}
 		 */
-		driverPreferredVehiclesControllerDelete: (
-			driverId: number,
-			vehicleId: number,
-			params: RequestParams = {}
-		) =>
+		driverPreferredVehiclesControllerDelete: (driverId: number, vehicleId: number, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/driver-preferred-vehicles/${driverId}/${vehicleId}`,
 				method: "DELETE",
@@ -1082,10 +1000,7 @@ export class Api<
 		 * @name DriverPreferredVehiclesControllerCreate
 		 * @request POST:/api/driver-preferred-vehicles
 		 */
-		driverPreferredVehiclesControllerCreate: (
-			data: CreateDriverPreferredVehiclesDto,
-			params: RequestParams = {}
-		) =>
+		driverPreferredVehiclesControllerCreate: (data: CreateDriverPreferredVehiclesDto, params: RequestParams = {}) =>
 			this.request<void, any>({
 				path: `/api/driver-preferred-vehicles`,
 				method: "POST",

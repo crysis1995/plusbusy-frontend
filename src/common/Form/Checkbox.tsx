@@ -1,7 +1,7 @@
 import React from "react";
 
 type Props = {
-	id?:string
+	id?: string;
 	ref?: React.LegacyRef<HTMLInputElement>;
 };
 

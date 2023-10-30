@@ -5,5 +5,9 @@ type Props = React.PropsWithChildren & {
 };
 
 export const Label = (props: Props) => {
-	return <label className={"selection:block"} htmlFor={props.htmlFor}>{props.children}</label>;
+	return (
+		<label className={"selection:block"} htmlFor={props.htmlFor}>
+			{props.children}
+		</label>
+	);
 };
